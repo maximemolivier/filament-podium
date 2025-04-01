@@ -1,21 +1,23 @@
 {
-    "name": ":vendor_slug/:package_slug",
-    "description": ":package_description",
+    "name": "maximemolivier/filament-podium",
+    "description": "Un plugin widget Podium pour Filament",
     "keywords": [
-        ":vendor_name",
+        "maximemolivier",
         "laravel",
-        ":package_slug"
+        "filament",
+        "filament-podium",
+        "podium"
     ],
-    "homepage": "https://github.com/:vendor_slug/:package_slug",
+    "homepage": "https://github.com/maximemolivier/filament-podium",
     "support": {
-        "issues": "https://github.com/:vendor_slug/:package_slug/issues",
-        "source": "https://github.com/:vendor_slug/:package_slug"
+        "issues": "https://github.com/maximemolivier/filament-podium/issues",
+        "source": "https://github.com/maximemolivier/filament-podium"
     },
     "license": "MIT",
     "authors": [
         {
-            "name": ":author_name",
-            "email": "author@domain.com",
+            "name": "Olivier Maxime",
+            "email": "maximemolivier@gmail.com",
             "role": "Developer"
         }
     ],
@@ -41,13 +43,13 @@
     },
     "autoload": {
         "psr-4": {
-            "VendorName\\Skeleton\\": "src/",
-            "VendorName\\Skeleton\\Database\\Factories\\": "database/factories/"
+            "Maximemolivier\\FilamentPodium\\": "src/",
+            "Maximemolivier\\FilamentPodium\\Database\\Factories\\": "database/factories/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "VendorName\\Skeleton\\Tests\\": "tests/"
+            "Maximemolivier\\FilamentPodium\\Tests\\": "tests/"
         }
     },
     "scripts": {
@@ -67,10 +69,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "VendorName\\Skeleton\\SkeletonServiceProvider"
+                "Maximemolivier\\FilamentPodium\\FilamentPodiumServiceProvider"
             ],
             "aliases": {
-                "Skeleton": "VendorName\\Skeleton\\Facades\\Skeleton"
+                "FilamentPodium": "Maximemolivier\\FilamentPodium\\Facades\\FilamentPodiumServiceProvider"
             }
         }
     },
