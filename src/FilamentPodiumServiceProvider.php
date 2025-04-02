@@ -76,22 +76,13 @@ class FilamentPodiumServiceProvider extends PackageServiceProvider
         // Icon Registration
         FilamentIcon::register($this->getIcons());
 
-        // Handle Stubs
-        if (app()->runningInConsole()) {
-            foreach (app(Filesystem::class)->files(__DIR__ . '/../stubs/') as $file) {
-                $this->publishes([
-                    $file->getRealPath() => base_path("stubs/filament-podium/{$file->getFilename()}"),
-                ], 'filament-podium-stubs');
-            }
-        }
-
         // Testing
         Testable::mixin(new TestsFilamentPodium);
     }
 
     protected function getAssetPackageName(): ?string
     {
-        return 'votrenom/filament-podium';
+        return 'maximemolivier/filament-podium';
     }
 
     /**
@@ -111,9 +102,7 @@ class FilamentPodiumServiceProvider extends PackageServiceProvider
      */
     protected function getCommands(): array
     {
-        return [
-            FilamentPodiumCommand::class,
-        ];
+        return [];
     }
 
     /**
@@ -145,8 +134,6 @@ class FilamentPodiumServiceProvider extends PackageServiceProvider
      */
     protected function getMigrations(): array
     {
-        return [
-            'create_filament_podium_table',
-        ];
+        return [];
     }
 }
