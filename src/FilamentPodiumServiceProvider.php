@@ -54,7 +54,8 @@ class FilamentPodiumServiceProvider extends PackageServiceProvider
         }
 
         if (file_exists($package->basePath('/../resources/views'))) {
-            $package->hasViews(static::$viewNamespace);
+            $package->name(static::$name)
+                ->hasViews('filament-podium');
         }
     }
 
@@ -91,7 +92,6 @@ class FilamentPodiumServiceProvider extends PackageServiceProvider
     protected function getAssets(): array
     {
         return [
-            // AlpineComponent::make('filament-podium', __DIR__ . '/../resources/dist/components/filament-podium.js'),
             Css::make('filament-podium-styles', __DIR__ . '/../resources/dist/filament-podium.css'),
             Js::make('filament-podium-scripts', __DIR__ . '/../resources/dist/filament-podium.js'),
         ];

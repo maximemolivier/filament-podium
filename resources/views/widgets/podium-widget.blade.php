@@ -1,95 +1,94 @@
 <x-filament-widgets::widget>
-    <x-filament::card>
-        <div class="filament-podium">
-            <h2 class="text-xl font-bold mb-4">
-                {{ __('filament-podium::podium.title') }}
-            </h2>
+    <x-filament::section>
+        <h3 class="fi-section-header-heading text-base font-semibold leading-6 text-gray-950 dark:text-white">
+            {{ __('filament-podium::podium.title') }}
+        </h3>
 
-            <div class="podium-container flex justify-center items-end space-x-4 mb-6">
-                @foreach ($items as $item)
-                    @php
-                        $height = match ($item['position']) {
-                            1 => 'h-32',
-                            2 => 'h-24',
-                            3 => 'h-20',
-                            default => 'h-16',
-                        };
+        @if ($items->isEmpty())
+            <div class="p-4 text-center text-gray-500">
+                Aucune donnée disponible pour le podium
+            </div>
+        @else
+            <div class="flex justify-center items-end space-x-6 min-h-[12rem] my-8 gap-2">
+                @php
+                    $height1 = 100;
+                    $height2 = 75;
+                    $height3 = 50;
+                @endphp
 
-                        $medalColor = match ($item['medal'] ?? null) {
-                            'gold' => 'bg-amber-400',
-                            'silver' => 'bg-gray-300',
-                            'bronze' => 'bg-amber-600',
-                            default => 'bg-gray-200',
-                        };
-                    @endphp
+                <!-- Second place podium -->
+                <div class="flex flex-col items-center transition-all duration-500 hover:translate-y-1"
+                    x-data="{}" x-init="setTimeout(() => {
+                        $el.style.opacity = 1;
+                        $el.style.transform = 'translateY(0)';
+                    }, 200)" style="opacity: 0; transform: translateY(20px);">
 
-                    <div
-                        class="podium-item flex flex-col items-center animate-in slide-in-from-bottom-{{ 2 * $item['position'] }}">
-                        @if ($item['avatar'])
-                            <div class="avatar mb-2">
-                                <img src="{{ $item['avatar'] }}" alt="{{ $item['label'] }}"
-                                    class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-md">
-                            </div>
-                        @endif
-
+                    @if (isset($items[1]))
                         <div class="text-center mb-2">
-                            <div class="font-medium">{{ $item['label'] }}</div>
-                            <div class="text-sm text-gray-500">{{ $item['value'] }}</div>
+                            <div class="font-medium text-gray-700 dark:text-gray-300">{{ $items[1]['label'] }}</div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">{{ $items[1]['value'] }}</div>
                         </div>
+                    @endif
 
-                        <div
-                            class="relative podium-block w-20 {{ $height }} {{ $medalColor }} rounded-t-md shadow-md flex items-center justify-center">
-                            <span
-                                class="absolute -top-3 w-8 h-8 rounded-full bg-white shadow flex items-center justify-center font-bold text-gray-800">
-                                {{ $item['position'] }}
-                            </span>
+                    <!-- Podium block with Filament style -->
+                    <div class="relative">
+                        <div style="width: 70px; height: {{ $height2 }}px;"
+                            class="rounded-t-lg relative overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700">
+
                         </div>
                     </div>
-                @endforeach
-            </div>
+                </div>
 
-            <div class="text-xs text-gray-500 text-center">
-                {{ __('filament-podium::podium.ranked_by') }}: {{ $attribute }}
-                ({{ $direction === 'desc' ? __('filament-podium::podium.highest') : __('filament-podium::podium.lowest') }})
+                <!-- First place podium (taller) -->
+                <div class="flex flex-col items-center transition-all duration-500 hover:translate-y-1"
+                    x-data="{}" x-init="setTimeout(() => {
+                        $el.style.opacity = 1;
+                        $el.style.transform = 'translateY(0)';
+                    }, 100)" style="opacity: 0; transform: translateY(20px);">
+
+                    @if (isset($items[0]))
+                        <div class="text-center mb-2">
+                            <div class="font-bold text-gray-800 dark:text-white">{{ $items[0]['label'] }}</div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">{{ $items[0]['value'] }}</div>
+                        </div>
+                    @endif
+
+                    <div class="relative">
+                        <div style="width: 80px; height: {{ $height1 }}px;"
+                            class="rounded-t-lg relative overflow-hidden bg-primary-100 dark:bg-primary-800 shadow-sm border border-primary-200 dark:border-primary-700">
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Third place podium (shortest) -->
+                <div class="flex flex-col items-center transition-all duration-500 hover:translate-y-1"
+                    x-data="{}" x-init="setTimeout(() => {
+                        $el.style.opacity = 1;
+                        $el.style.transform = 'translateY(0)';
+                    }, 300)" style="opacity: 0; transform: translateY(20px);">
+
+                    @if (isset($items[2]))
+                        <div class="text-center mb-2">
+                            <div class="font-medium text-gray-700 dark:text-gray-300">{{ $items[2]['label'] }}</div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">{{ $items[2]['value'] }}</div>
+                        </div>
+                    @endif
+
+                    <div class="relative">
+                        <div style="width: 70px; height: {{ $height3 }}px;"
+                            class="rounded-t-lg relative overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700">
+
+                        </div>
+                    </div>
+                </div>
             </div>
+        @endif
+
+        <!-- Ranking info with Filament styling -->
+        <div class="text-xs text-center pt-2 text-gray-500 dark:text-gray-400">
+            {{ __('filament-podium::podium.ranked_by') }}: {{ $attribute ?? 'N/A' }}
+            ({{ isset($direction) && $direction === 'desc' ? __('filament-podium::podium.highest') : __('filament-podium::podium.lowest') }})
         </div>
-    </x-filament::card>
+    </x-filament::section>
 </x-filament-widgets::widget>
-
-<style>
-    @keyframes slideInFromBottom {
-        0% {
-            transform: translateY(50%);
-            opacity: 0;
-        }
-
-        100% {
-            transform: translateY(0);
-            opacity: 1;
-        }
-    }
-
-    .podium-container {
-        min-height: 12rem;
-    }
-
-    .podium-item {
-        animation: slideInFromBottom 0.5s ease-out forwards;
-        animation-delay: calc(var(--animation-order) * 0.1s);
-    }
-
-    .podium-item:nth-child(1) {
-        --animation-order: 2;
-        order: 2;
-    }
-
-    .podium-item:nth-child(2) {
-        --animation-order: 1;
-        order: 1;
-    }
-
-    .podium-item:nth-child(3) {
-        --animation-order: 3;
-        order: 3;
-    }
-</style>
