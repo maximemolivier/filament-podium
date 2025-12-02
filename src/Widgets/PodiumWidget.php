@@ -11,7 +11,7 @@ class PodiumWidget extends Widget
 {
     protected int | string | array $columnSpan = 'full';
 
-    protected static string $view = 'filament-podium::widgets.podium-widget';
+    protected string $view = 'filament-podium::widgets.podium-widget';
 
     protected array $medals = [
         1 => 'gold',

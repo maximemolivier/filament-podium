@@ -1,67 +1,181 @@
-# :package_description
+# Filament Podium Widget
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/:vendor_slug/:package_slug.svg?style=flat-square)](https://packagist.org/packages/:vendor_slug/:package_slug)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/:vendor_slug/:package_slug/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/:vendor_slug/:package_slug/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/:vendor_slug/:package_slug/fix-php-code-styling.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/:vendor_slug/:package_slug/actions?query=workflow%3A"Fix+PHP+code+styling"+branch%3Amain)
-[![Total Downloads](https://img.shields.io/packagist/dt/:vendor_slug/:package_slug.svg?style=flat-square)](https://packagist.org/packages/:vendor_slug/:package_slug)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/maximemolivier/filament-podium.svg?style=flat-square)](https://packagist.org/packages/maximemolivier/filament-podium)
+[![Total Downloads](https://img.shields.io/packagist/dt/maximemolivier/filament-podium.svg?style=flat-square)](https://packagist.org/packages/maximemolivier/filament-podium)
 
-<!--delete-->
----
-This repo can be used to scaffold a Filament plugin. Follow these steps to get started:
+A beautiful podium/leaderboard widget for Filament v4. Display rankings for anything: top sellers, best performers, highest scores, and more.
 
-1. Press the "Use this template" button at the top of this repo to create a new repo with the contents of this skeleton.
-2. Run "php ./configure.php" to run a script that will replace all placeholders throughout all the files.
-3. Make something great!
----
-<!--/delete-->
+![Podium Widget Preview](https://raw.githubusercontent.com/maximemolivier/filament-podium/main/art/preview.png)
 
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
+## Features
+
+- **Visual Podium Display** - Beautiful 3-step podium for top 3 positions
+- **Extended Layout** - Shows podium + scrollable list when displaying more than 3 items
+- **Fully Customizable** - Labels, values, avatars, titles, and more
+- **Dark Mode Support** - Seamless light/dark theme integration
+- **Animations** - Smooth entrance animations
+- **Fluent API** - Easy-to-use chainable configuration
+- **Custom Queries** - Use Eloquent models, query builders, or raw SQL
+
+## Requirements
+
+- PHP 8.2+
+- Laravel 11.x or 12.x
+- Filament 4.x
 
 ## Installation
 
-You can install the package via composer:
+Install the package via Composer:
 
 ```bash
-composer require :vendor_slug/:package_slug
+composer require maximemolivier/filament-podium
 ```
 
-You can publish and run the migrations with:
+Optionally, publish the config file:
 
 ```bash
-php artisan vendor:publish --tag=":package_slug-migrations"
-php artisan migrate
-```
-
-You can publish the config file with:
-
-```bash
-php artisan vendor:publish --tag=":package_slug-config"
-```
-
-Optionally, you can publish the views using
-
-```bash
-php artisan vendor:publish --tag=":package_slug-views"
-```
-
-This is the contents of the published config file:
-
-```php
-return [
-];
+php artisan vendor:publish --tag="filament-podium-config"
 ```
 
 ## Usage
 
+### Basic Usage
+
+Create a new widget that extends `PodiumWidget`:
+
 ```php
-$variable = new VendorName\Skeleton();
-echo $variable->echoPhrase('Hello, VendorName!');
+namespace App\Filament\Widgets;
+
+use App\Models\User;
+use Maximemolivier\FilamentPodium\Widgets\PodiumWidget;
+
+class TopSellersWidget extends PodiumWidget
+{
+    protected function setUp(): void
+    {
+        $this->model(User::class)
+            ->attribute('sales_count')
+            ->label('name')
+            ->title('Top Sellers');
+    }
+}
 ```
 
-## Testing
+Then register it in your Panel or Dashboard.
+
+### With Avatars and Crown
+
+```php
+protected function setUp(): void
+{
+    $this->model(User::class)
+        ->attribute('points')
+        ->label('name')
+        ->avatar('avatar_url')
+        ->crown()
+        ->limit(5)
+        ->title('Leaderboard');
+}
+```
+
+### Custom Value Formatting
+
+```php
+protected function setUp(): void
+{
+    $this->model(Product::class)
+        ->attribute('revenue')
+        ->label('name')
+        ->formatValue(fn ($value) => '$' . number_format($value, 2))
+        ->title('Top Products by Revenue');
+}
+```
+
+### Custom Query
+
+```php
+protected function setUp(): void
+{
+    $this->model(User::class)
+        ->query(fn ($query) => $query
+            ->where('is_active', true)
+            ->withCount('orders')
+            ->orderByDesc('orders_count')
+        )
+        ->label('name')
+        ->valueAttribute('orders_count')
+        ->title('Most Active Users');
+}
+```
+
+### Raw SQL Query
+
+```php
+protected function setUp(): void
+{
+    $this->rawQuery("
+        SELECT
+            users.name as label,
+            COUNT(orders.id) as value,
+            users.avatar as avatar
+        FROM users
+        JOIN orders ON orders.user_id = users.id
+        WHERE orders.created_at >= ?
+        GROUP BY users.id
+        ORDER BY value DESC
+        LIMIT 10
+    ", [now()->subMonth()])
+    ->title('Top Sellers This Month');
+}
+```
+
+## Available Methods
+
+| Method | Description |
+|--------|-------------|
+| `model(string $class)` | Set the Eloquent model to query |
+| `attribute(string $attr)` | Set the attribute to rank/sort by |
+| `label(string $attr)` | Set the attribute for display labels |
+| `labelUsing(Closure $callback)` | Custom callback to generate labels |
+| `valueAttribute(string $attr)` | Set attribute for displayed value (if different from sort) |
+| `formatValue(Closure $callback)` | Format the displayed value |
+| `avatar(string $attr)` | Set the attribute for avatar URLs |
+| `crown(bool $show = true)` | Show trophy icon on first place |
+| `asc()` | Sort ascending (lowest first) |
+| `desc()` | Sort descending (highest first) - default |
+| `limit(int $count)` | Maximum items to display |
+| `title(string\|Closure $title)` | Set widget title (static or dynamic) |
+| `query(Closure $callback)` | Custom query builder callback |
+| `rawQuery(string $sql, array $bindings)` | Use raw SQL query |
+
+## Configuration
+
+The published config file (`config/filament-podium.php`):
+
+```php
+return [
+    'defaults' => [
+        'limit' => 3,
+        'show_crown' => false,
+        'sort_direction' => 'desc',
+    ],
+];
+```
+
+## Customization
+
+### Publishing Views
+
+To customize the widget's appearance:
 
 ```bash
-composer test
+php artisan vendor:publish --tag="filament-podium-views"
+```
+
+### Publishing Translations
+
+```bash
+php artisan vendor:publish --tag="filament-podium-translations"
 ```
 
 ## Changelog
@@ -78,7 +192,7 @@ Please review [our security policy](../../security/policy) on how to report secu
 
 ## Credits
 
-- [:author_name](https://github.com/:author_username)
+- [Olivier Maxime](https://github.com/maximemolivier)
 - [All Contributors](../../contributors)
 
 ## License
