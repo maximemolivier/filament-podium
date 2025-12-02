@@ -1,94 +1,159 @@
 <x-filament-widgets::widget>
     <x-filament::section>
-        <h3 class="fi-section-header-heading text-base font-semibold leading-6 text-gray-950 dark:text-white">
-            {{ __('filament-podium::podium.title') }}
-        </h3>
+        <x-slot name="heading">
+            {{ $customTitle ?? __('filament-podium::podium.title') }}
+        </x-slot>
 
         @if ($items->isEmpty())
-            <div class="p-4 text-center text-gray-500">
-                Aucune donnée disponible pour le podium
+            <div class="p-4 text-center text-gray-500 dark:text-gray-400">
+                {{ __('filament-podium::podium.no_data') }}
+            </div>
+        @elseif($showExtendedLayout)
+            {{-- Extended layout: Podium (left) + List (right) --}}
+            <div class="flex flex-row" style="max-height: 280px; overflow-y: hidden;">
+                {{-- Podium Section (Left) --}}
+                <div class="w-1/2 pr-4">
+                    <div class="flex justify-center items-end space-x-4 min-h-[12rem] my-4">
+                        @php
+                            $heights = [180, 120, 70];
+                            $widths = [80, 70, 70];
+                            $order = [1, 0, 2]; // Display order: 2nd, 1st, 3rd
+                            $delays = [200, 100, 300];
+                        @endphp
+
+                        @foreach ($order as $position)
+                            @if (isset($items[$position]))
+                                @php $item = $items[$position]; @endphp
+                                <div class="flex flex-col items-center transition-all duration-500 hover:translate-y-1"
+                                    x-data="{}"
+                                    x-init="setTimeout(() => { $el.style.opacity = 1; $el.style.transform = 'translateY(0)'; }, {{ $delays[$loop->index] }})"
+                                    style="opacity: 0; transform: translateY(20px);">
+
+                                    <div class="text-center mb-2">
+                                        @if ($position === 0 && $showCrown)
+                                            <div class="flex justify-center mb-1">
+                                                <x-filament::icon
+                                                    icon="heroicon-s-trophy"
+                                                    class="w-6 h-6 text-yellow-500"
+                                                />
+                                            </div>
+                                        @endif
+
+                                        @if (!empty($item['avatar']))
+                                            <div class="flex justify-center mb-1">
+                                                <img src="{{ $item['avatar'] }}"
+                                                     alt="{{ $item['label'] }}"
+                                                     class="w-{{ $position === 0 ? 10 : 8 }} h-{{ $position === 0 ? 10 : 8 }} rounded-full object-cover border border-gray-200 dark:border-gray-700">
+                                            </div>
+                                        @endif
+
+                                        <div class="{{ $position === 0 ? 'font-bold text-gray-800 dark:text-white' : 'font-medium text-gray-700 dark:text-gray-300' }} truncate max-w-[80px]">
+                                            {{ $item['label'] }}
+                                        </div>
+                                        <div class="text-sm text-gray-500 dark:text-gray-400">
+                                            {{ $item['value'] }}
+                                        </div>
+                                    </div>
+
+                                    <div class="relative">
+                                        <div style="width: {{ $widths[$position] }}px; height: {{ $heights[$position] }}px;"
+                                             class="rounded-t-lg relative overflow-hidden shadow-sm border
+                                                    {{ $position === 0 ? 'bg-primary-100 dark:bg-gray-700 border-primary-200 dark:border-gray-600' : 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700' }}">
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+
+                {{-- List Section (Right) --}}
+                <div class="w-1/2 pl-4">
+                    <div class="border rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 overflow-y-auto h-full">
+                        <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+                            @foreach ($items->slice(3) as $item)
+                                <li class="p-3 transition-colors duration-150 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                    <div class="flex items-center gap-3">
+                                        <div class="flex-shrink-0 font-medium text-gray-500 dark:text-gray-400 w-6 text-center">
+                                            {{ $item['position'] }}
+                                        </div>
+
+                                        @if (!empty($item['avatar']))
+                                            <img src="{{ $item['avatar'] }}"
+                                                 alt="{{ $item['label'] }}"
+                                                 class="w-8 h-8 rounded-full object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0">
+                                        @endif
+
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                                {{ $item['label'] }}
+                                            </p>
+                                        </div>
+
+                                        <div class="flex-shrink-0 text-sm text-gray-500 dark:text-gray-300">
+                                            {{ $item['value'] }}
+                                        </div>
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
             </div>
         @else
-            <div class="flex justify-center items-end space-x-6 min-h-[12rem] my-8 gap-2">
+            {{-- Standard layout: Just podium --}}
+            <div class="flex justify-center items-end space-x-4 min-h-[12rem] my-4">
                 @php
-                    $height1 = 100;
-                    $height2 = 75;
-                    $height3 = 50;
+                    $heights = [180, 120, 70];
+                    $widths = [80, 70, 70];
+                    $order = [1, 0, 2]; // Display order: 2nd, 1st, 3rd
+                    $delays = [200, 100, 300];
                 @endphp
 
-                <!-- Second place podium -->
-                <div class="flex flex-col items-center transition-all duration-500 hover:translate-y-1"
-                    x-data="{}" x-init="setTimeout(() => {
-                        $el.style.opacity = 1;
-                        $el.style.transform = 'translateY(0)';
-                    }, 200)" style="opacity: 0; transform: translateY(20px);">
+                @foreach ($order as $position)
+                    @if (isset($items[$position]))
+                        @php $item = $items[$position]; @endphp
+                        <div class="flex flex-col items-center transition-all duration-500 hover:translate-y-1"
+                            x-data="{}"
+                            x-init="setTimeout(() => { $el.style.opacity = 1; $el.style.transform = 'translateY(0)'; }, {{ $delays[$loop->index] }})"
+                            style="opacity: 0; transform: translateY(20px);">
 
-                    @if (isset($items[1]))
-                        <div class="text-center mb-2">
-                            <div class="font-medium text-gray-700 dark:text-gray-300">{{ $items[1]['label'] }}</div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">{{ $items[1]['value'] }}</div>
+                            <div class="text-center mb-2">
+                                @if ($position === 0 && $showCrown)
+                                    <div class="flex justify-center mb-1">
+                                        <x-filament::icon
+                                            icon="heroicon-s-trophy"
+                                            class="w-6 h-6 text-yellow-500"
+                                        />
+                                    </div>
+                                @endif
+
+                                @if (!empty($item['avatar']))
+                                    <div class="flex justify-center mb-1">
+                                        <img src="{{ $item['avatar'] }}"
+                                             alt="{{ $item['label'] }}"
+                                             class="w-{{ $position === 0 ? 10 : 8 }} h-{{ $position === 0 ? 10 : 8 }} rounded-full object-cover border border-gray-200 dark:border-gray-700">
+                                    </div>
+                                @endif
+
+                                <div class="{{ $position === 0 ? 'font-bold text-gray-800 dark:text-white' : 'font-medium text-gray-700 dark:text-gray-300' }} truncate max-w-[80px]">
+                                    {{ $item['label'] }}
+                                </div>
+                                <div class="text-sm text-gray-500 dark:text-gray-400">
+                                    {{ $item['value'] }}
+                                </div>
+                            </div>
+
+                            <div class="relative">
+                                <div style="width: {{ $widths[$position] }}px; height: {{ $heights[$position] }}px;"
+                                     class="rounded-t-lg relative overflow-hidden shadow-sm border
+                                            {{ $position === 0 ? 'bg-primary-100 dark:bg-gray-700 border-primary-200 dark:border-gray-600' : 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700' }}">
+                                </div>
+                            </div>
                         </div>
                     @endif
-
-                    <!-- Podium block with Filament style -->
-                    <div class="relative">
-                        <div style="width: 70px; height: {{ $height2 }}px;"
-                            class="rounded-t-lg relative overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700">
-
-                        </div>
-                    </div>
-                </div>
-
-                <!-- First place podium (taller) -->
-                <div class="flex flex-col items-center transition-all duration-500 hover:translate-y-1"
-                    x-data="{}" x-init="setTimeout(() => {
-                        $el.style.opacity = 1;
-                        $el.style.transform = 'translateY(0)';
-                    }, 100)" style="opacity: 0; transform: translateY(20px);">
-
-                    @if (isset($items[0]))
-                        <div class="text-center mb-2">
-                            <div class="font-bold text-gray-800 dark:text-white">{{ $items[0]['label'] }}</div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">{{ $items[0]['value'] }}</div>
-                        </div>
-                    @endif
-
-                    <div class="relative">
-                        <div style="width: 80px; height: {{ $height1 }}px;"
-                            class="rounded-t-lg relative overflow-hidden bg-primary-100 dark:bg-primary-800 shadow-sm border border-primary-200 dark:border-primary-700">
-
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Third place podium (shortest) -->
-                <div class="flex flex-col items-center transition-all duration-500 hover:translate-y-1"
-                    x-data="{}" x-init="setTimeout(() => {
-                        $el.style.opacity = 1;
-                        $el.style.transform = 'translateY(0)';
-                    }, 300)" style="opacity: 0; transform: translateY(20px);">
-
-                    @if (isset($items[2]))
-                        <div class="text-center mb-2">
-                            <div class="font-medium text-gray-700 dark:text-gray-300">{{ $items[2]['label'] }}</div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">{{ $items[2]['value'] }}</div>
-                        </div>
-                    @endif
-
-                    <div class="relative">
-                        <div style="width: 70px; height: {{ $height3 }}px;"
-                            class="rounded-t-lg relative overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700">
-
-                        </div>
-                    </div>
-                </div>
+                @endforeach
             </div>
         @endif
-
-        <!-- Ranking info with Filament styling -->
-        <div class="text-xs text-center pt-2 text-gray-500 dark:text-gray-400">
-            {{ __('filament-podium::podium.ranked_by') }}: {{ $attribute ?? 'N/A' }}
-            ({{ isset($direction) && $direction === 'desc' ? __('filament-podium::podium.highest') : __('filament-podium::podium.lowest') }})
-        </div>
     </x-filament::section>
 </x-filament-widgets::widget>

@@ -2,7 +2,5 @@
 
 return [
     'title' => 'Podium',
-    'ranked_by' => 'Ranked by',
-    'highest' => 'highest',
-    'lowest' => 'lowest',
+    'no_data' => 'No data available',
 ];
